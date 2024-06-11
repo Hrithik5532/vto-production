@@ -1,0 +1,8 @@
+asgiref
+Django
+pyactiveresource
+pytz
+PyYAML
+ShopifyAPI
+six
+sqlparse

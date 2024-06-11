@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eshtyle | Virtual Try-On</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
+        integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            background-color: black;
+            overflow-x: hidden;
+        }
+
+        #loader {
+            position: fixed;
+            z-index: 99;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(128, 127, 127, 0.5);
+            /* Semi-transparent grey background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #loaderLogo {
+            width: 200px;
+            animation: spin 2s linear infinite;
+        }
+
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+
+        /* If you want to fade out the loader, you should add this too: */
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+
+            to {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+
+        /* Use the fadeOut animation */
+        #loader {
+            animation: fadeOut 2s ease-out forwards;
+            animation-delay: 3s;
+            /* Adjust based on how long you want the loader to show */
+        }
+
+        .side-section,
+        .main-section {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .model,
+        .garment,
+        .output {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .model img,
+        .output img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .garment-selection {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            padding: 10px;
+        }
+
+        .garment-selection img {
+            width: 100%;
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .garment-selection img:hover {
+            transform: scale(1.1);
+        }
+
+        .garment-showcase {
+            margin: 10px;
+        }
+
+        .garment-showcase img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+            margin: 1rem 0rem;
+        }
+
+        /* Add additional styles as needed */
+        .waitlistBtn1 {
+            cursor: pointer;
+            padding: 10px 20px;
+            /* Gradient background for buttons using colors from the logo */
+            color: black;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: transform 0.2s ease-in-out;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            background-color: white;
+            border: 1px solid black;
+            box-shadow: 1px 1px 10px;
+            margin-top: 1rem;
+        }
+
+        .waitlistBtn1:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        #waitlistBtn {
+            cursor: pointer;
+            padding: 10px 20px;
+            background-image: linear-gradient(to right, #f95f7b, #bae0e8, #548bb2, #eeba52, #e6275d);
+            /* Gradient background for buttons using colors from the logo */
+            color: black;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: transform 0.2s ease-in-out;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            border: 1px solid black;
+            box-shadow: 1px 1px 10px;
+            margin: auto;
+            width: 60%;
+        }
+
+        #waitlistBtn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .menu {
+            position: absolute;
+            left: -2rem;
+            top: -2rem;
+        }
+
+        .menu img {
+            background: aliceblue;
+            border-radius: 11rem;
+            width: 10rem;
+            margin-top: 0.5rem;
+            transform: rotateZ(331deg);
+        }
+
+        @media screen and (max-width: 768px) {
+            .menu img {
+                background: transparent;
+                /* Set background to transparent on small screens */
+            }
+        }
+
+        .social {
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+            margin-left: 0.875rem;
+            position: absolute;
+            -webkit-box-orient: vertical;
+            -webkit-box-direction: normal;
+            -ms-flex-direction: column;
+            flex-direction: column;
+            justify-self: space-around;
+            top: 12rem;
+
+        }
+
+        .social img {
+            display: block;
+            margin-top: 2rem;
+        }
+
+        .instructions-container {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+
+        .instructions-title {
+            color: #333;
+            text-align: center;
+        }
+
+        .instructions-list {
+            list-style: inside;
+        }
+
+        .note {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        img {
+            max-width: 100%;
+            display: block;
+            margin: 20px auto;
+        }
+
+
+
+        .navbar-links {
+            display: block;
+            /* Block layout by default */
+        }
+
+        /* Media query for larger screens */
+        @media screen and (min-width: 768px) {
+            .navbar-links {
+                display: flex;
+                /* Flex layout on larger screens */
+            }
+        }
+
+        /* Style the modal's background */
+        .modal-1 {
+            display: none;
+            /* Hidden by default */
+            position: fixed;
+            /* Stay in place */
+            z-index: 1000;
+            /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%;
+            /* Full width */
+            height: 100%;
+            /* Full height */
+            overflow: auto;
+            /* Enable scroll if needed */
+            background-color: rgb(0, 0, 0);
+            /* Fallback color */
+            background-color: rgba(0, 0, 0, 0.9);
+            /* Black w/ opacity */
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        /* Style the modal content */
+        .modal-content-1 {
+            margin: auto;
+            display: block;
+            width: 80%;
+            max-width: 700px;
+        }
+
+        /* The Close Button */
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #bbb;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        #output_img {
+            cursor: pointer;
+        }
+
+        a {
+            cursor: pointer;
+        }
+
+        @media screen and (max-width: 768px) {
+            .topmenu {
+                margin-top: 100px;
+                /* Set margin-top to 50px on small screens */
+            }
+
+            .topmenu li {
+                margin: 0rem 1rem;
+            }
+
+            .topmenu li a {
+                margin: 0rem 0rem;
+
+            }
+
+            .garment {
+                margin-top: 1rem;
+            }
+
+            #showcaseImage {
+                width: 20rem;
+                height: 20rem;
+            }
+        }
+
+        .heading {
+            font-size: 1.5rem;
+            color: #fff;
+            background: linear-gradient(to right, #f95f7b, #bae0e8, #548bb2, #eeba52, #e6275d);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            /* Make the text color transparent to show the gradient */
+            border-right: 3px solid white;
+            /* The typing cursor */
+            white-space: nowrap;
+            overflow: hidden;
+            /* Ensures the content doesn't wrap */
+            display: inline-block;
+            /* Allows the width to fit content, not full width */
+            text-align: center;
+            justify-content: center;
+            margin: 0px 3rem;
+        }
+
+        .h-1 {
+            display: none;
+        }
+
+        @media screen and (max-width: 768px) {
+            .h-1 {
+                font-size: 1.5rem;
+                color: #fff;
+                background: linear-gradient(to right, #f95f7b, #bae0e8, #548bb2, #eeba52, #e6275d);
+                -webkit-background-clip: text;
+                background-clip: text;
+                color: transparent;
+                /* Make the text color transparent to show the gradient */
+                display: inline-block;
+                text-align: center;
+                justify-content: center;
+                display: block;
+            }
+
+            .h-2 {
+                display: none;
+            }
+        }
+    </style>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            background-color: black;
+            overflow-x: hidden;
+        }
+
+        .menu {
+            position: absolute;
+            left: -2rem;
+            top: -2rem;
+        }
+
+        .menu img {
+            background: aliceblue;
+            border-radius: 11rem;
+            width: 10rem;
+            margin-top: 0.5rem;
+            transform: rotateZ(331deg);
+        }
+
+        @media screen and (max-width: 768px) {
+            .menu img {
+                background: transparent;
+                /* Set background to transparent on small screens */
+            }
+        }
+
+        .social {
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+            margin-left: 0.875rem;
+            position: absolute;
+            -webkit-box-orient: vertical;
+            -webkit-box-direction: normal;
+            -ms-flex-direction: column;
+            flex-direction: column;
+            justify-self: space-around;
+            top: 12rem;
+        }
+
+        .social img {
+            display: block;
+            margin-top: 2rem;
+        }
+
+        .topmenu li {
+            margin: 0 15px;
+            /* Adjust spacing between menu items */
+            padding: 10px 20px;
+            /* Adjust padding inside menu items */
+            border: 1px solid white;
+            /* Border for menu items */
+            margin: 0.5rem;
+            border-radius: 25px;
+            /* Rounded corners for menu items */
+            transition: background-color 0.3s, color 0.3s;
+            /* Transition for hover effect */
+        }
+
+        .topmenu {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            /* Center menu items */
+            flex-wrap: wrap;
+            /* Wrap items on smaller screens */
+            padding-left: 0;
+            /* Remove default padding */
+            margin-top: 50px;
+            /* Adjust as per layout */
+        }
+
+
+        .topmenu li a {
+            text-decoration: none;
+            color: white;
+            /* Text color */
+        }
+
+        .topmenu li:hover {
+            background-color: white;
+            /* Background color on hover */
+            color: black;
+            /* Text color on hover */
+            text-decoration: none;
+            /* No underline on hover */
+
+        }
+
+        .topmenu li:hover>a {
+            color: black;
+            /* Text color on hover */
+        }
+
+        /* Media query for larger screens */
+    </style>
+</head>
+
+<body>
+
+    
+
+    <div>
+
+        <div class="social">
+            <a href="https://www.instagram.com/ig_eshtyle/" target="_blank"> <img
+                    src="https://vikram-hegde.github.io/resources/images/instagram.svg" alt="" /></a>
+        </div>
+
+    </div>
+    
+
+
+    <div class="navbar-links">
+
+        <div class="container" style="margin-top: 7rem;">
+            <div class="instructions-container">
+                <h1 class="instructions-title">How to Use Our Virtual Try-On Feature !</h1>
+                <p>Follow these simple steps to see how you look in your selected outfit:</p>
+                <ol class="instructions-list">
+                    <li>Select Your Image: Choose a full-body image of yourself. Ensure the image features only you,
+                        with a plain background for the best results.
+                    </li>
+                    <li>Choose Your Outfit: Browse through our collection and select the T-shirt design you'd like to
+                        try on.
+                    </li>
+                    <li>Submit Your Choices: Click on the "Submit/Generate" button to see how the outfit looks on you.
+                        Our AI will work its magic to dress you in your selected outfit.
+                    </li>
+                    <li>View Your Virtual Try-On: <span >If our system is experiencing high
+                            demand, you'll be placed in a queue. Don't worry, we'll email you once your virtual try-on
+                            is ready.
+                        </span>
+                    </li>
+                    <li>
+                        Disclaimer for AI Limitations: <span style="color:#e6275d;">Please note that the virtual try-on results are AI-generated and their accuracy may vary depending on image quality, lighting conditions, and pose.</span>
+                    </li>
+
+                </ol>
+                <p class="note">Note: If you're not in a queue, your new look will be displayed directly on the website.
+                </p>
+
+            </div>
+
+        </div>
+        <form id="virtualTryOnForm">
+            <div class="container" style="margin-top: 7rem;">
+
+                <div class="navbar-links">
+                    <div class="side-section model" style="overflow: hidden;">
+                        <!-- Displayed Image -->
+                        <img id="modelImageDisplay" src="default_model.png" alt="Default Model"
+                            style="width: 100%; max-width: 300px;">
+
+                        <!-- Upload Button -->
+                        <button type="button" onclick="document.getElementById('file-input').click()"
+                            class="waitlistBtn1">Change Model</button>
+
+                        <!-- Hidden File Input -->
+                        <input type="file" id="file-input" style="display: none;" accept="image/*"
+                            onchange="changeModelImage(event)">
+                    </div>
+
+
+                    <div class="main-section garment">
+                        <!-- Image Showcase -->
+                        <div class="garment-showcase">
+                            <img id="showcaseImage" name="cloth" src="{{product_image_url}}" alt="Selected Garment">
+                        </div>
+                        <!-- Garment Selection -->
+                       
+                        <div class="garment-selection">
+                            <!-- Replace with actual garment images -->
+                            <img src="{{product_image_url}}" alt="Garment 1" onclick="selectGarment('{{product_image_url}}')">
+                           
+                            <!-- More garments... -->
+                        </div>
+                    </div>
+
+                    <div class="side-section output">
+                        <!-- Output Image -->
+
+                        <img src="models/image (13).png" id="output_img" alt="Output Image">
+                        <div class="output-selection garment-selection" style="display:none">
+                            <!-- Replace with actual garment images -->
+
+                        </div>
+                    </div>
+
+                </div>
+                <div style="  
+            width: 100%;
+            display: flex;flex-direction:column">
+                    <button id="waitlistBtn" type="submit" onclick="submitForm(event)">Submit</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+
+
+    <!-- Popup Modal -->
+    <div id="imageModal" class="modal-1">
+        <!-- The Close Button -->
+        <span class="close">&times;</span>
+
+        <!-- Modal Content (The Image) -->
+        <img class="modal-content-1" id="img01">
+
+    </div>
+
+    <div id="popupModal"
+        style="display:none; position:fixed; z-index:100; left:0; top:0; width:100%; height:100%; overflow:auto; background-color: rgba(0,0,0,0.4); align-items:center; justify-content:center; text-align:center;">
+        <div
+            style="background-color: #fefefe; margin: auto; padding: 20px; border: 1px solid #888; width: 80%; max-width:600px;">
+            <img src="logo.png" alt="Logo" width="200px" style="margin: auto;">
+            <p style="font-size: 25px;" id="popupcontent">It might take a few seconds to process your request. Please
+                wait...</p>
+        </div>
+    </div>
+
+
+
+
+    <footer class="text-center bg-body-tertiary">
+        <!-- Grid container -->
+        <div class=" pt-4" style="background-color: black;">
+            <!-- Section: Social media -->
+            <section class="mb-4">
+
+
+
+                <!-- Instagram -->
+                <a data-mdb-ripple-init class="btn btn-link btn-floating btn-lg text-body m-1"
+                    href="https://www.instagram.com/ig_eshtyle" role="button"><i class="fa fa-instagram"
+                        style="color: white;"></i></a>
+
+                <!-- Linkedin -->
+                <a data-mdb-ripple-init class="btn btn-link btn-floating btn-lg text-body m-1" href="#!"
+                    role="button"><i class="fa fa-linkedin" style="color: white;"></i></a>
+
+            </section>
+            <!-- Section: Social media -->
+        </div>
+        <!-- Grid container -->
+
+        <!-- Copyright -->
+       
+        </div>
+            <span>
+
+                © 2024 Copyright:
+                <a class="text-body" href="https://zenrevo.com/">www.zenrevo.com</a>
+            </span>
+        </div>
+        <!-- Copyright -->
+    </footer>
+
+
+
+
+
+
+
+        
+
+
+
+
+
+    <script>
+        // Get the modal
+        var modal = document.getElementById("imageModal");
+        var modalImg = document.getElementById("img01");
+
+        // Get the image and insert it inside the modal - use its "alt" text as a caption
+        var outputImg = document.getElementById("output_img");
+        outputImg.onclick = function () {
+            modal.style.display = "block";
+            modalImg.src = this.src;
+        }
+
+        // Get the <span> element that closes the modal
+        var span = document.getElementsByClassName("close")[0];
+
+        // When the user clicks on <span> (x), close the modal
+        span.onclick = function () {
+            modal.style.display = "none";
+        }
+
+        // If you want the modal to close when clicking outside the image as well:
+        modal.onclick = function (event) {
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        }
+
+
+        
+
+
+        function selectGarment(imageSrc) {
+            document.getElementById('showcaseImage').src = imageSrc;
+        }
+
+        function changeModelImage(event) {
+            // Get the file from the input
+            var file = event.target.files[0];
+
+            // Check if the user selected a file
+            if (file) {
+                // Create a URL for the selected file
+                var imgURL = URL.createObjectURL(file);
+
+                // Update the displayed image src with the selected file's URL
+                document.getElementById('modelImageDisplay').src = imgURL;
+            }
+        }
+
+
+
+    </script>
+
+
+    <script>
+
+        function printFormData(formData) {
+            for (let [key, value] of formData.entries()) {
+                console.log(key, value);
+            }
+        }
+
+        function submitForm(event) {
+            event.preventDefault();
+
+            document.getElementById('popupModal').style.display = 'flex';
+
+            var formData = new FormData();
+
+            // Proceed with handling model image and garment image
+            handleImageUpload('modelImageDisplay', 'default_model.png', formData, 'model_image');
+
+            var garmentImageSrc = document.getElementById('showcaseImage').src;
+            convertImageToBlob(garmentImageSrc, blob => {
+                formData.append('cloth', blob, 'selectedGarment.png');
+                // Proceed with sending the formData
+                sendFormData(formData);
+            });
+        }
+
+        function handleImageUpload(imageId, defaultSrc, formData, formKey) {
+            var imageElement = document.getElementById(imageId);
+            var imageSrc = imageElement.src;
+
+            if (imageSrc.endsWith(defaultSrc)) {
+                // It's the default image, fetch and convert to Blob
+                convertImageToBlob(imageSrc, blob => {
+                    formData.append(formKey, blob, defaultSrc.split('/').pop());
+                });
+            } else {
+                // User-uploaded image, assumed to already be a Blob
+                var fileInput = document.getElementById('file-input');
+                var imageFile = fileInput.files[0];
+                formData.append(formKey, imageFile, imageFile.name);
+            }
+        }
+
+        function convertImageToBlob(imageSrc, callback) {
+            fetch(imageSrc)
+                .then(response => response.blob())
+                .then(blob => {
+                    callback(blob);
+                })
+                .catch(error => console.error('Error converting image to Blob:', error));
+        }
+        function sendFormData(formData) {
+            // The loader is already displayed when submitForm is called
+            printFormData(formData);
+            fetch('https://dashboard.eshtyle.com/api/vtryon', {
+                method: 'POST',
+                
+                body: formData,
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Submission successful:', data);
+                    if (data.error) {
+                        alert(data.message);
+
+                    }
+                    else {
+
+                        localStorage.setItem('vtonId', data.id);
+                        alert(data.message + ' Please check your email for the output image.');
+                        document.getElementById('output_img').src = 'https://i.giphy.com/xTk9ZvMnbIiIew7IpW.webp';
+                        document.getElementById('waitlistBtn').disabled = true;
+                        // Initiating WebSocket connection after successful form submission
+                        initiateWebSocketConnection(data.id);
+                    }
+                })
+                .catch(error => {
+                    console.error('Submission error:', error);
+                    alert('An error occurred while processing. Please try again.');
+                })
+                .finally(() => {
+                    document.getElementById('popupModal').style.display = 'none';
+                });
+        }
+
+        function initiateWebSocketConnection(vtonId) {
+            const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+            const wsUrl = `wss://dashboard.eshtyle.com/ws/vtryon/${vtonId}/`;
+
+            const ws = new WebSocket(wsUrl);
+
+            ws.onmessage = function (event) {
+                const data = JSON.parse(event.data);
+                console.log(data.message);
+
+                // Check if the message indicates that the virtual try-on images are ready
+                if (data.message === 'Your virtual try-on images are ready!') {
+                    // Notify the user
+                    alert(data.message);
+
+                    // Define the URL for the GET request
+                    const getUrl = `https://dashboard.eshtyle.com/api/virtually-tried-detailed/${vtonId}`;
+
+                    // Send the GET request
+                    fetch(getUrl, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'token ' + localStorage.getItem('authToken')
+
+                            // Include other headers if needed, like authorization tokens
+                        }
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        .then(responseData => {
+                            console.log(responseData);
+                            document.getElementById('output_img').src = 'https://dashboard.eshtyle.com' + responseData.output_image;
+                            populateOutputImage(responseData);
+                            // Handle the response data here
+                            // For example, display the data in an alert or render it in the DOM
+                        })
+                        .catch(error => console.error('Error fetching data:', error));
+                }
+            };
+
+            ws.onerror = function (event) {
+                console.error("WebSocket error observed:", event);
+            };
+
+            ws.onclose = function (event) {
+                console.log("WebSocket connection closed:", event);
+            };
+        }
+
+
+
+
+        function populateOutputImage(responseData) {
+            const garmentSelectionDiv = document.querySelector('.output-selection');
+
+            // Clear existing content
+            garmentSelectionDiv.innerHTML = '';
+
+            // Base URL for images
+            const baseUrl = 'https://dashboard.eshtyle.com';
+
+            // Array of image URLs
+            const imageUrls = [
+                responseData.output_image,
+                responseData.output_image_1,
+                responseData.output_image_2
+            ];
+
+            // Create and append img elements for each image URL
+            imageUrls.forEach(imageUrl => {
+                const imgElement = document.createElement('img');
+                imgElement.src = baseUrl + imageUrl;
+                imgElement.alt = 'Output Image';
+                imgElement.onclick = () => outputImage(baseUrl + imageUrl);
+                garmentSelectionDiv.appendChild(imgElement);
+            });
+
+            // Show the garment selection div
+            garmentSelectionDiv.style.display = 'grid';
+        }
+
+        function outputImage(imageUrl) {
+            // Set the source of the main output image to the clicked image's URL
+            document.getElementById('output_img').src = imageUrl;
+        }
+
+    </script>
+
+</body>
+
+</html>
