@@ -12,7 +12,8 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 
 import os
 from shopify_app import *
-
+from dotenv import load_dotenv
+load_dotenv()
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -26,10 +27,11 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['https://2865-205-254-166-34.ngrok-free.app','2865-205-254-166-34.ngrok-free.app', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['*']
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://2865-205-254-166-34.ngrok-free.app',
+    'https://*.eshtyle.com/',
+    'https://virtual-try-on.eshtyle.com/',
 ]
 
 # Application definition
@@ -49,8 +51,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-        'corsheaders.middleware.CorsMiddleware',
-
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -133,15 +134,6 @@ USE_TZ = False
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-CSRF_TRUSTED_ORIGINS = [
-    'https://2865-205-254-166-34.ngrok-free.app',
-]
-
-ALLOWED_HOSTS = [
-    '2865-205-254-166-34.ngrok-free.app',
-    'localhost',
-    '127.0.0.1',
-]
 
 
 SHOPIFY_API_SCOPE = ['read_products', 'read_orders']
@@ -194,7 +186,12 @@ CORS_ALLOW_HEADERS = [
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = False
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'http')
 
 
 CELERY_BROKER_URL = 'redis://localhost:6379'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+CELERY_TASK_TIME_LIMIT = 300  # Increase if necessary
+CELERY_TASK_SOFT_TIME_LIMIT = 240  # Increase if necessary

@@ -10,7 +10,7 @@ class ShopifyStoreDetails(models.Model):
     access_token = models.CharField(max_length=255)
     file_path = models.CharField(max_length=255)
     shop_id = models.CharField(max_length=255)
-
+    shop_logo = models.CharField(max_length=255,blank=True,null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField
     
@@ -35,7 +35,7 @@ class OutputPath(object):
 
 class VirtualTryOn(models.Model):
     shop_id = models.CharField(max_length=255,blank=True, null=True)
-    product_image_url = models.CharField(max_length=255)
+    product_image_url = models.ImageField(upload_to='cloth')
     full_body_image = models.ImageField(upload_to=VtronPath("shop_id"))
     output_image = models.ImageField(upload_to=OutputPath("shop_id"),blank=True, null=True)
     version = models.CharField(max_length=255,default="v1")
