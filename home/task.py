@@ -30,47 +30,43 @@ def process_vtryon(self, vton_id):
         logger.info(f'Cloth Image: {cloth_path}')
 
         try:
-            client = Client("yisol/IDM-VTON")
 
     
             
-            result = client.predict(
-		dict={"background":file(model_image_path),"layers":[file(model_image_path)],"composite":file(model_image_path)},
-		garm_img=file(cloth_path),
-		garment_des="Hello!!",
-		is_checked=True,
-		is_checked_crop=False,
-		denoise_steps=30,
-		seed=42,
-		api_name="/tryon"
-)
+#             result = client.predict(
+# 		dict={"background":file(model_image_path),"layers":[file(model_image_path)],"composite":file(model_image_path)},
+# 		garm_img=file(cloth_path),
+# 		garment_des="Hello!!",
+# 		is_checked=True,
+# 		is_checked_crop=False,
+# 		denoise_steps=30,
+# 		seed=42,
+# 		api_name="/tryon"
+# )
 
-            logger.info('Processing result received')
+#             logger.info('Processing result received')
             
-            file_path = result[0]
+#             file_path = result[0]
+
+            client = Client("https://d1546b62db1f574a27.gradio.live/")
+            result = client.predict(
+                    param_0={"background":file(model_image_path),"layers":[file(model_image_path)],"composite":file(model_image_path)},
+                    param_1=file(cloth_path),
+                    param_2='upper',
+		param_3=50,
+		param_4=2.5,
+		param_5=42,
+		param_6="input & mask & result",
+		api_name="/lambda"
+            )
+            print(result)
+            file_path = result
         except Exception as api_error:
-            logger.error(f"Error calling API: {api_error}")
+            logger.error(f"Error calling API: {api_error},!!!!!!!!!!!!!!!!!!")
             
         
         
-            try:
-                client = Client("levihsu/OOTDiffusion")
-                result = client.predict(
-                    vton_img=handle_file(model_image_path),
-                    garm_img=handle_file(cloth_path),
-                    n_samples=1,
-                    n_steps=20,
-                    image_scale=2,
-                    seed=-1,
-                    api_name="/process_hd"
-                )
             
-                logger.info('Processing result received')
-                
-                file_path = result[0]['image']
-            except Exception as api_error:
-                logger.error(f"Error calling API: {api_error}")
-                raise self.retry(exc=api_error)
         
         with open(file_path, 'rb') as file_:
             content = file_.read()

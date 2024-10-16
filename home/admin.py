@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import ShopifyStoreDetails,VirtualTryOn
+from .models import VirtualTryOn,APIKey
 
-admin.site.register(ShopifyStoreDetails)
 admin.site.register(VirtualTryOn)
+admin.site.register(APIKey)
