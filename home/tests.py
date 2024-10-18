@@ -1,11 +1,11 @@
 from gradio_client import Client, handle_file,file
 
 # Create the client for your hosted Gradio interface
-client = Client("https://4115b0d63c946118ae.gradio.live/")
+client = Client("http://172.83.15.166:8080/")
 
 # Define the input parameters
-person_image_path = '/home/ubuntu/vto-production/media/bodyimage/man-rnhs-0069.jpg'
-cloth_image_path = '/home/ubuntu/vto-production/media/cloth/cricket.png'
+person_image_path = '/home/ubuntu/VTO/ZenVton/vto-production/media/bodyimage/man-rnhs-0069.jpg'
+cloth_image_path = '/home/ubuntu/VTO/ZenVton/vto-production/media/cloth/cricket.png'
 
 result = client.predict(
     param_0={

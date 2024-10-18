@@ -21,19 +21,25 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Make this unique and store it as an environment variable. 
 # Do not share it with anyone or commit it to version control.
-SECRET_KEY = os.environ.get('DJANGO_SECRET')
+SECRET_KEY = 'django-insecure-4w$qp@n#(khx(l&b3db238(hepe=v25549oyo!y$h0k-2&1gv0'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['172.83.15.166', 'tryon.mksdigitech.com', 'localhost', '127.0.0.1']
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://*.eshtyle.com/',
-    'https://virtual-try-on.eshtyle.com/',
+    'https://*.mksdigitech.com',
+    'https://tryon.mksdigitech.com',
+        'http://tryon.mksdigitech.com:8800',
+
 ]
 
 # Application definition
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5368709120  # 5 GB
+
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -48,8 +54,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',  # Ensure this is present
@@ -85,7 +91,7 @@ WSGI_APPLICATION = 'ZenVton_django_app.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': os.path.join(BASE_DIR, 'db', 'db.sqlite3'),  # Make sure this matches
     }
 }
 
@@ -120,7 +126,7 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = False
+USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
@@ -179,17 +185,28 @@ CORS_ALLOW_HEADERS = [
     'x-csrftoken',
     'x-requested-with',
 ]
-
+CORS_ALLOWED_ORIGINS = [
+    'https://tryon.mksdigitech.com',
+]
 CORS_ALLOW_ALL_ORIGINS = True
-SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'http')
+# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
 CELERY_BROKER_URL = 'redis://localhost:6379'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379'
 CELERY_TASK_TIME_LIMIT = 300  # Increase if necessary
 CELERY_TASK_SOFT_TIME_LIMIT = 240  # Increase if necessary
+
+# SECURE_HSTS_SECONDS = 31536000  # One year
+# SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+# SECURE_HSTS_PRELOAD = True
+
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_BROWSER_XSS_FILTER = True
+
+X_FRAME_OPTIONS = 'DENY'
 
 
 STATIC_URL = '/static/'

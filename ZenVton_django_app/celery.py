@@ -2,8 +2,18 @@ from __future__ import absolute_import, unicode_literals
 import os
 from celery import Celery
 import logging
-from celery.signals import after_setup_logger, after_setup_task_logger
+import sys
+from pathlib import Path
 
+from celery.signals import after_setup_logger, after_setup_task_logger
+import multiprocessing
+
+# Set the 'spawn' start method before creating the Celery app
+multiprocessing.set_start_method('spawn', force=True)
+
+# Add the project root to the Python path
+BASE_DIR = Path(__file__).resolve().parent.parent
+sys.path.append(str(BASE_DIR))
 # Set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ZenVton_django_app.settings')
 
