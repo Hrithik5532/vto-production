@@ -20,7 +20,7 @@ import logging
 from celery.utils.log import get_task_logger
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
-
+import random 
 logger = get_task_logger(__name__)
 
 # Define arguments
@@ -97,9 +97,9 @@ def process_vtryon(self, vton_id):
 
         # Set parameters
         cloth_type = vton.type  # or vton.cloth_type if available
-        num_inference_steps = 50
-        guidance_scale = 2.5
-        seed = 42
+        num_inference_steps = random.randint(60,70)
+        guidance_scale = random.uniform(3.0, 5.0)
+        seed = random.randint(40, 100)
 
         # Resize images
         person_image = resize_and_crop(person_image, (args.width, args.height))
